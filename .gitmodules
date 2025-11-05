@@ -1,0 +1,3 @@
+[submodule "cite-met-app-frontend"]
+	path = cite-met-app-frontend
+	url = git@github.com:choyiny/cite-met-app-frontend.git

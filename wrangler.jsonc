@@ -1,0 +1,49 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "cite-met-app",
+  "main": "src/index.ts",
+  "compatibility_date": "2025-09-06",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "AUTH_EMAIL_FROM": "hello@cite-met.com"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "db",
+      "database_id": "cd22f3e4-5403-44a9-bda6-c28f6aacee07",
+    },
+  ],
+  // "ai": {
+  //   "binding": "AI"
+  // },
+  "observability": {
+    "enabled": true,
+    "head_sampling_rate": 1,
+  },
+  "assets": {
+    "binding": "ASSETS",
+    "directory": "./public"
+	},
+  "containers": [
+    {
+      "class_name": "Sandbox",
+      "image": "./Dockerfile",
+      "instance_type": "basic"
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      {
+        "class_name": "Sandbox",
+        "name": "Sandbox"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "new_sqlite_classes": ["Sandbox"],
+      "tag": "v1"
+    }
+  ]
+}

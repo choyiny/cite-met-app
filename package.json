@@ -1,0 +1,45 @@
+{
+  "name": "cite-met-app",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "build:frontend": "./build-frontend.sh",
+    "build:frontend:dev": "./build-frontend-dev.sh",
+    "build": "npx tsc --noEmit",
+    "deploy": "wrangler deploy --minify",
+    "cf-typegen": "wrangler types --env-interface CloudflareBindings",
+    "auth:generate": "npx --yes @better-auth/cli@latest generate --config src/auth/index.ts --output src/db/auth.schema.ts -y",
+    "auth:migrate": "npx --yes @better-auth/cli@latest migrate --config src/auth/index.ts",
+    "auth:format": "npx --yes prettier --write src/db/auth.schema.ts",
+    "auth:update": "npm run auth:generate && npm run auth:format",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate:dev": "wrangler d1 migrations apply db --local",
+    "db:migrate:prod": "wrangler d1 migrations apply db --remote",
+    "db:studio:dev": "drizzle-kit studio",
+    "db:studio:prod": "NODE_ENV=production drizzle-kit studio",
+    "prettier": "prettier --write ."
+  },
+  "dependencies": {
+    "@better-auth/stripe": "^1.3.9",
+    "@cloudflare/sandbox": "^0.4.15",
+    "@hono/sentry": "^1.2.2",
+    "@hono/swagger-ui": "^0.5.2",
+    "@hono/zod-openapi": "^1.1.0",
+    "@react-email/components": "^0.5.2",
+    "better-auth": "^1.3.9",
+    "better-sqlite3": "^12.2.0",
+    "drizzle-orm": "^0.44.5",
+    "hono": "^4.9.6",
+    "react": "^19.1.1",
+    "react-dom": "^19.1.1",
+    "resend": "^6.0.2",
+    "stripe": "^18.5.0",
+    "zod": "^4.1.5"
+  },
+  "devDependencies": {
+    "@types/node": "^24.3.1",
+    "drizzle-kit": "^0.31.4",
+    "prettier": "^3.6.2",
+    "wrangler": "^4.4.0"
+  }
+}
