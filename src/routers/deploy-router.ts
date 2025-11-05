@@ -81,13 +81,21 @@ deployRoutes.openapi(postDeploy, async (c): Promise<any> => {
     const cloneUrl = credential
       ? `https://${credential}@github.com/${owner}/${repoName}.git`
       : `https://github.com/${owner}/${repoName}.git`;
-    await sandbox.gitCheckout(cloneUrl, { targetDir: "app/workspace/repo" });
+    await sandbox.exec(`rm -rf /app/workspace/repo`);
+    await sandbox.gitCheckout(cloneUrl, { targetDir: "/app/workspace/repo" });
     console.log("Cloned repo");
     const installCommand = await sandbox.exec(`cd /app/workspace/repo && npm install --legacy-peer-deps`);
     console.log(installCommand.stdout);
-    await sandbox.startProcess(`npm run dev -- --host=0.0.0.0`);
+    console.log(installCommand.stderr);
+    const buildCommand = await sandbox.exec(`npm run build`);
+    console.log(buildCommand.stdout);
+    console.log(buildCommand.stderr);
+    await sandbox.startProcess(`python -m http.server 8000 --bind 0.0.0.0`, { cwd: `/app/workspace/repo/dist` });
     console.log("Started dev server");
-    exposed = await sandbox.exposePort(8080, { hostname: `cite-met.com` });
+    const ports = await sandbox.getExposedPorts("cite-met.com");
+    if (!ports.some(p => p.port === 8000)) {
+      exposed = await sandbox.exposePort(8000, { hostname: `cite-met.com` });
+    }
   } catch (_) {
     await sandbox.destroy();
     return c.json({ repo: { url: sanitizedRepoUrl }, error: "Failed to deploy repository." });

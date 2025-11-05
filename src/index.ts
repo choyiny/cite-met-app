@@ -69,6 +69,8 @@ app.doc('/doc', {
 app.get('/swagger-ui', swaggerUI({ url: '/doc' }))
 
 app.get("*", async (c) => {
+  const proxyResponse = await proxyToSandbox(c.req.raw, c.env);
+  if (proxyResponse) return proxyResponse;
   if (c.req.path.startsWith("/api/auth/")) {
     const auth = c.get("auth");
     return auth.handler(c.req.raw);
@@ -84,12 +86,7 @@ app.get("*", async (c) => {
 });
 
 export default {
-  fetch: async (request, env, ctx) => {
-    // Handle preview URL routing first
-    const proxyResponse = await proxyToSandbox(request, env);
-    if (proxyResponse) return proxyResponse;
-    return app.fetch(request, env, ctx);
-  },
+  fetch: app.fetch,
 };
 
 export { Sandbox } from '@cloudflare/sandbox';
