@@ -13,7 +13,7 @@
       "pattern": "app.cite-met.com",
     },
     {
-      "pattern": "*.preview.cite-met.com/*",
+      "pattern": "*.cite-met.com/*",
       "zone_name": "cite-met.com"
     }
   ],
@@ -39,7 +39,8 @@
     {
       "class_name": "Sandbox",
       "image": "./Dockerfile",
-      "instance_type": "basic"
+      "instance_type": "basic",
+      "max_instances": 5
     }
   ],
   "durable_objects": {

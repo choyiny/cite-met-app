@@ -74,29 +74,24 @@ deployRoutes.openapi(postDeploy, async (c): Promise<any> => {
   const sanitizedRepoUrl = `https://github.com/${owner}/${repoName}`;
 
   // Derive sandbox id
-  const repoSlug = sanitizedRepoUrl
-    .replace(/^https:\/\/github.com\//, "")
-    .replace(/\.git$/, "")
-    .replace(/[^a-zA-Z0-9-_]/g, "-");
-  const sandboxId = `deploy-${repoSlug}-${Date.now().toString(36)}`;
-  console.log(sandboxId);
-  const sandbox = getSandbox(c.env.Sandbox, sandboxId);
+  // const sandboxId = `${owner}-${repoName}`;
+  const sandbox = getSandbox(c.env.Sandbox, owner);
   let exposed = {};
-  // try {
-  const cloneUrl = credential
-    ? `https://${credential}@github.com/${owner}/${repoName}.git`
-    : `https://github.com/${owner}/${repoName}.git`;
-  await sandbox.gitCheckout(cloneUrl, { targetDir: "app/workspace/repo" });
-  console.log("Cloned repo");
-  const installCommand = await sandbox.exec(`cd /app/workspace/repo && npm install --legacy-peer-deps`);
-  console.log(installCommand.stdout);
-  await sandbox.startProcess(`npm run dev`);
-  console.log("Started dev server");
-  exposed = await sandbox.exposePort(5173, { hostname: "test.preview.cite-met.com " });
-  // } catch (_) {
-  //   await sandbox.destroy();
-  //   return c.json({ repo: { url: sanitizedRepoUrl }, error: "Failed to deploy repository." });
-  // }
+  try {
+    const cloneUrl = credential
+      ? `https://${credential}@github.com/${owner}/${repoName}.git`
+      : `https://github.com/${owner}/${repoName}.git`;
+    await sandbox.gitCheckout(cloneUrl, { targetDir: "app/workspace/repo" });
+    console.log("Cloned repo");
+    const installCommand = await sandbox.exec(`cd /app/workspace/repo && npm install --legacy-peer-deps`);
+    console.log(installCommand.stdout);
+    await sandbox.startProcess(`npm run dev -- --host=0.0.0.0`);
+    console.log("Started dev server");
+    exposed = await sandbox.exposePort(8080, { hostname: `cite-met.com` });
+  } catch (_) {
+    await sandbox.destroy();
+    return c.json({ repo: { url: sanitizedRepoUrl }, error: "Failed to deploy repository." });
+  }
 
   return c.json({ repo: { url: sanitizedRepoUrl }, exposed });
 });

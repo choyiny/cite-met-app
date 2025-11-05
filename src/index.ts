@@ -8,7 +8,6 @@ import { injectDb } from "./db/middleware";
 import { planRoutes } from "./routers/plan-router";
 import { deployRoutes } from "./routers/deploy-router";
 import { Variables } from "./variables";
-import { request } from "http";
 import { proxyToSandbox } from "@cloudflare/sandbox";
 
 const app = new OpenAPIHono<{ Bindings: CloudflareBindings; Variables: Variables }>();
