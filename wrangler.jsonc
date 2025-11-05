@@ -7,6 +7,16 @@
   "vars": {
     "AUTH_EMAIL_FROM": "hello@cite-met.com"
   },
+  "routes": [
+    {
+      "custom_domain": true,
+      "pattern": "app.cite-met.com",
+    },
+    {
+      "pattern": "*.preview.cite-met.com/*",
+      "zone_name": "cite-met.com"
+    }
+  ],
   "d1_databases": [
     {
       "binding": "DB",

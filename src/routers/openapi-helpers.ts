@@ -51,18 +51,30 @@ export const json400Response = {
   },
 };
 
+export const json500Response = {
+  500: {
+    content: {
+      "application/json": {
+        schema: z.object({
+          error: z.string(),
+        }),
+      },
+    },
+    description: "Internal Error",
+  },
+};
+
 
 /**
  * This function returns a middleware to check if the request body
  * contains the required params. If not, return a 422 with the missing param.
  */
 export const requireBodyParams = (params: string[]) => {
-  function present(obj: object, keys: string) {
-    const keyList = keys.split("."); // Split the keys string by dot (.) separator
-    let currentObj = obj;
-    for (let i = 0; i < keyList.length; i++) {
-      const key = keyList[i];
-      if (currentObj.hasOwnProperty(key)) {
+  function present(obj: Record<string, any>, keys: string) {
+    const keyList = keys.split(".");
+    let currentObj: any = obj;
+    for (const key of keyList) {
+      if (currentObj && Object.prototype.hasOwnProperty.call(currentObj, key)) {
         currentObj = currentObj[key];
       } else {
         return false;
@@ -71,7 +83,7 @@ export const requireBodyParams = (params: string[]) => {
     return true;
   }
 
-  return async (c, next) => {
+  return async (c: any, next: () => Promise<void>) => {
     const requestBody = await c.req.json();
     for (const param of params) {
       if (!present(requestBody, param)) {

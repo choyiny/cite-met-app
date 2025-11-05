@@ -6,7 +6,10 @@ import { createAuth } from "./auth";
 import { OpenAPIHono } from "@hono/zod-openapi";
 import { injectDb } from "./db/middleware";
 import { planRoutes } from "./routers/plan-router";
+import { deployRoutes } from "./routers/deploy-router";
 import { Variables } from "./variables";
+import { request } from "http";
+import { proxyToSandbox } from "@cloudflare/sandbox";
 
 const app = new OpenAPIHono<{ Bindings: CloudflareBindings; Variables: Variables }>();
 app.use("*", sentry());
@@ -54,6 +57,7 @@ app.all("/api/auth/*", async (c) => {
 });
 
 app.route("/api/plans/", planRoutes);
+app.route("/api/deploy/", deployRoutes);
 
 app.doc('/doc', {
   openapi: '3.0.0',
@@ -81,7 +85,12 @@ app.get("*", async (c) => {
 });
 
 export default {
-  fetch: app.fetch,
+  fetch: async (request, env, ctx) => {
+    // Handle preview URL routing first
+    const proxyResponse = await proxyToSandbox(request, env);
+    if (proxyResponse) return proxyResponse;
+    return app.fetch(request, env, ctx);
+  },
 };
 
 export { Sandbox } from '@cloudflare/sandbox';

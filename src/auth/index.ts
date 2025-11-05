@@ -1,11 +1,9 @@
 import { betterAuth } from "better-auth";
-import { admin, anonymous, bearer, emailOTP, magicLink, openAPI } from "better-auth/plugins";
+import { admin, anonymous } from "better-auth/plugins";
 import { passkey } from "better-auth/plugins/passkey"
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { drizzle } from "drizzle-orm/d1";
 import { plans, schema } from "../db";
-import { Resend } from "resend";
-import renderMagicLinkEmail from "../emails/sign-in-link";
 import Stripe from "stripe";
 import { stripe } from "@better-auth/stripe";
 
@@ -20,7 +18,6 @@ function createAuth(
 
   const plugins: any[] = [
     anonymous(),
-    openAPI(),
     admin(),
     passkey(),
   ]
@@ -49,19 +46,6 @@ function createAuth(
         }
       }),
     );
-    plugins.push(emailOTP({
-      sendVerificationOTP: async ({ email, otp, type }, request) => {
-        if (type === "sign-in") {
-          const resend = new Resend(env.RESEND_API_KEY);
-          await resend.emails.send({
-            from: env.AUTH_EMAIL_FROM,
-            to: email,
-            subject: "CiteMET: Your Sign In token is ready!",
-            html: await renderMagicLinkEmail({ token: otp }),
-          });
-        }
-      }
-    }))
   }
   
   return betterAuth({
