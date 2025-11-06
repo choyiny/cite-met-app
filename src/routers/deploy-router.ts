@@ -83,14 +83,15 @@ deployRoutes.openapi(postDeploy, async (c): Promise<any> => {
       : `https://github.com/${owner}/${repoName}.git`;
     await sandbox.exec(`rm -rf /app/workspace/repo`);
     await sandbox.gitCheckout(cloneUrl, { targetDir: "/app/workspace/repo" });
+    const session = await sandbox.createSession();
     console.log("Cloned repo");
-    const installCommand = await sandbox.exec(`cd /app/workspace/repo && npm install --legacy-peer-deps`);
+    const installCommand = await session.exec(`cd /app/workspace/repo && npm install --legacy-peer-deps`);
     console.log(installCommand.stdout);
     console.log(installCommand.stderr);
-    const buildCommand = await sandbox.exec(`npm run build`);
+    const buildCommand = await session.exec(`npm run build`);
     console.log(buildCommand.stdout);
     console.log(buildCommand.stderr);
-    await sandbox.startProcess(`python -m http.server 8000 --bind 0.0.0.0`, { cwd: `/app/workspace/repo/dist` });
+    await session.startProcess(`python -m http.server 8000 --bind 0.0.0.0`, { cwd: `/app/workspace/repo/dist` });
     console.log("Started dev server");
     const ports = await sandbox.getExposedPorts("cite-met.com");
     if (!ports.some(p => p.port === 8000)) {
